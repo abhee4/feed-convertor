@@ -1,18 +1,50 @@
-var express = require('express');
+//var express = require('express');
 
+//var Feed = require('rss-to-json');
+
+//var app = express();
+
+//app.get('/getjson', function(req, res){
+
+//    let rssURL = req.query.feedurl;
+
+//    Feed.load(rssURL, function(err, rss){ 
+
+//    res.end(JSON.stringify(rss));
+//  });
+   //res.send("Hello world!");
+//});
+
+//app.listen(3000);i
+//
+//
+
+var express = require('express');
+var app = express();
 var Feed = require('rss-to-json');
 
-var app = express();
-
-app.get('/getjson', function(req, res){
-
-    let rssURL = req.query.feedurl;
-
-    Feed.load(rssURL, function(err, rss){ 
-
-    res.end(JSON.stringify(rss));
-  });
-   //res.send("Hello world!");
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
 });
 
-app.listen(3000);
+app.set('port', (process.env.PORT || 5000));
+
+app.get('/', function(req, res, next) {
+  if (req.query.feedURL) {
+    Feed.load(req.query.feedURL, function(err, rss){
+      if (err) {
+        res.send({ 'error': 'An error has occurred' });
+      } else {
+        res.send(rss);
+      }
+    });
+  } else {
+    res.status(400).send({ 'error': 'feedURL is required' });
+  }
+});
+
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
+});
